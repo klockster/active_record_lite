@@ -7,10 +7,6 @@ class SQLObject < MassObject
   # sets the table_name
   def self.set_table_name(table_name)
     @table_name = table_name
-    query = <<-SQL
-
-    SQL
-    #DBConnection.execute(query)
   end
 
   # gets the table_name
