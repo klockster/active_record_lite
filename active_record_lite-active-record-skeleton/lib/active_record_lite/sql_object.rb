@@ -56,24 +56,34 @@ class SQLObject < MassObject
   # use send and map to get instance values.
   # after, update the id attribute with the helper method from db_connection
   def create
-    columns = self.attributes
+    columns = self.class.attributes
     params = attribute_values
     query = <<-SQL
     INSERT INTO
-    #{self.table_name} (columns.join(", "))
+      #{self.class.table_name} (#{columns.join(", ")})
     VALUES
-    #{(['?']*columns.length).join(", ")}
-
-
+      #{(['?']*columns.length).join(", ")}
     SQL
 
     results = DBConnection.execute(query,params)
-
+    self.class.find(DBConnection.last_insert_row_id)
   end
 
   # executes query that updates the row in the db corresponding to this instance
   # of the class. use "#{attr_name} = ?" and join with ', ' for set string.
   def update
+    columns = self.class.attributes
+    params = attribute_values
+    set_string = columns.map{ |col| '#{col} = ?'}.join(", ")
+    query = <<-SQL
+    UPDATE
+      #{self.class.table_name}
+    SET
+      #{set_string}
+    SQL
+
+    results = DBConnection.execute(query,params)
+    self.class.find(self.id)
   end
 
   # call either create or update depending if id is nil.
@@ -87,7 +97,7 @@ class SQLObject < MassObject
 
   # helper method to return values of the attributes.
   def attribute_values
-    self.attributes.map do |attri|
+    self.class.attributes.map do |attri|
       instance_variable_get("@#{attri}")
     end
   end
