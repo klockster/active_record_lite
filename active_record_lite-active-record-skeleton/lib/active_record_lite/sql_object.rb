@@ -33,12 +33,42 @@ class SQLObject < MassObject
   # querys database for record of this type with id passed.
   # returns either a single object or nil.
   def self.find(id)
+    params = [id]
+    query = <<-SQL
+    SELECT
+      *
+    FROM
+      #{self.table_name}
+    WHERE
+      id = (?)
+    LIMIT
+      1
+
+    SQL
+
+    results = DBConnection.execute(query,params[0])
+    return nil if results.empty?
+
+    self.parse_all(results).first
   end
 
   # executes query that creates record in db with objects attribute values.
   # use send and map to get instance values.
   # after, update the id attribute with the helper method from db_connection
   def create
+    columns = self.attributes
+    params = attribute_values
+    query = <<-SQL
+    INSERT INTO
+    #{self.table_name} (columns.join(", "))
+    VALUES
+    #{(['?']*columns.length).join(", ")}
+
+
+    SQL
+
+    results = DBConnection.execute(query,params)
+
   end
 
   # executes query that updates the row in the db corresponding to this instance
@@ -48,9 +78,18 @@ class SQLObject < MassObject
 
   # call either create or update depending if id is nil.
   def save
+    if self.id.nil?
+      create
+    else
+      update
+    end
   end
 
   # helper method to return values of the attributes.
   def attribute_values
+    self.attributes.map do |attri|
+      instance_variable_get("@#{attri}")
+    end
   end
+
 end
