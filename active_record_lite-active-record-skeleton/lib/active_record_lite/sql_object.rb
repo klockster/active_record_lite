@@ -4,6 +4,8 @@ require_relative './mass_object'
 require_relative './searchable'
 
 class SQLObject < MassObject
+  extend Searchable #makes class methods from the module methods
+  extend Associatable
   # sets the table_name
   def self.set_table_name(table_name)
     @table_name = table_name
@@ -74,12 +76,15 @@ class SQLObject < MassObject
   def update
     columns = self.class.attributes
     params = attribute_values
-    set_string = columns.map{ |col| '#{col} = ?'}.join(", ")
+    params << self.id
+    set_string = columns.map{ |col| "#{col} = ?"}.join(", ")
     query = <<-SQL
     UPDATE
       #{self.class.table_name}
     SET
       #{set_string}
+    WHERE
+      id = (?)
     SQL
 
     results = DBConnection.execute(query,params)

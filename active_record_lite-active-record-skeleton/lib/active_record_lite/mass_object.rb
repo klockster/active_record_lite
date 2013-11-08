@@ -35,6 +35,10 @@ class MassObject
     @attributes ||= []
   end
 
+  def self.assoc_params
+    @assoc_params ||= {}
+  end
+
   # takes an array of hashes.
   # returns array of objects.
   def self.parse_all(results)

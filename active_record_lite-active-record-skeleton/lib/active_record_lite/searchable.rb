@@ -6,5 +6,18 @@ module Searchable
   # Hash#values will be helpful here.
   # returns an array of objects
   def where(params)
+    where_str = params.keys.map{|key| "#{key} = ?"}.join(" AND ")
+    query = <<-SQL
+    SELECT
+      *
+    FROM
+      #{self.table_name}
+    WHERE
+    #{where_str}
+    SQL
+
+    results = DBConnection.execute(query,params.values)
+    return nil if results.empty?
+    self.parse_all(results)
   end
 end
