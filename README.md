@@ -1,5 +1,5 @@
 #ActiveRecord-Lite
-#####Check out code in active_record_lite-active-record-skeleton/lib/active_record_lite
+#####Check out code in `active_record_lite-active-record-skeleton/lib/active_record_lite`
 ##Description
 This is a metaprogramming challenge to replicate features of Rails' ActiveRecord
 ##Features
